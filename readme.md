@@ -1,3 +1,5 @@
+# AI Stack 開發環境架構指南
+
 ## Google Antigravity 安裝指南
 
 以下是安裝 Google Antigravity 的詳細步驟：
@@ -203,7 +205,7 @@
 
 ##### 3. 實用 Workflows 範本（中文版）
 
-以下我為您設計了三個針對您興趣（Python、Mermaid、文件化）的 Workflow 範本。您可以將這些存成 `.yaml` 檔放入資料夾中。
+以下我為您設計了三個針對您興趣（Python、Mermaid、文件化）的 Workflow 範本。可以將這些存成 `.yaml` 檔放入資料夾中。
 
 ###### 範本 A：Python 單元測試生成器 (Unit Test Generator)
 
@@ -273,13 +275,13 @@ steps:
 
 在您提交程式碼前，讓 Agent 擔任資深工程師幫您檢查。
 
-* **檔案名稱**：`review.yaml`
-* **觸發指令**：`/review`
+* **檔案名稱**：`review_python.yaml`
+* **觸發指令**：`/review_python`
 
 ```yaml
-name: Senior Code Review
+name: Senior Python Code Review
 description: 進行嚴格的代碼審查並提供繁體中文報告
-trigger: /review
+trigger: /review_python
 
 steps:
   - name: 安全與效能檢查
@@ -289,7 +291,7 @@ steps:
 
   - name: 風格檢查
     instruction: |
-      檢查是否符合 PEP 8 (Python) 或 Flutter Linter 規範。
+      檢查是否符合 PEP 8 (Python) 規範。
       檢查變數命名是否語意清晰。
 
   - name: 產出報告
@@ -318,3 +320,96 @@ steps:
 * 想要看懂一段複雜的邏輯？ -> 選取程式碼，輸入 `/mermaid`
 * 寫完功能了？ -> 輸入 `/review`
 * **觀察執行**：您會看到 Agent 按照您定義的 `steps` 一步步執行，而不是漫無目的地亂猜。
+
+## opencode 安裝指南
+
+* **網路上太多opencode的類似名稱，請注意opencode超自動，連安裝package都自動來，所以請熟悉後再大量使用**
+專案網址：<https://github.com/anomalyco/opencode>
+OpenCode（原名 Anomaly）是一個開源的 AI 軟體工程師與程式碼編輯器。它的核心目標是成為一個能夠深度理解您程式碼庫、並能模仿您編碼風格的 AI 助手。
+  * 核心功能：
+    * 全自動上下文 (Context-Aware)： 它能檢索並理解整個專案的結構，而不僅僅是當前檔案。
+    * 模型無關 (Model Agnostic)： 支援接入多種 LLM 模型，如 Claude 3.5 Sonnet、GPT-4o、Llama 3 等。
+    * 隱私優先： 您的程式碼和資料保留在本地或您的私有雲中，適合企業級安全需求。
+    * 多平台支援： 提供了終端機介面 (TUI)、桌面應用程式 (Desktop App) 以及 VS Code 擴充套件。
+
+### 0. 我選的方式
+
+* **Anaconda 環境安裝nodejs:**
+
+```bash
+conda config --add channels conda-forge
+conda config --set channel_priority strict
+conda create -n aistack python=3.12 -y
+conda activate aistack
+conda install nodejs -y
+```
+
+安裝有幾種方式自選:
+
+```bash
+# YOLO
+curl -fsSL https://opencode.ai/install | bash
+
+# Package managers
+npm i -g opencode-ai@latest        # or bun/pnpm/yarn
+scoop bucket add extras; scoop install extras/opencode  # Windows
+choco install opencode             # Windows
+brew install anomalyco/tap/opencode # macOS and Linux (recommended, always up to date)
+brew install opencode              # macOS and Linux (official brew formula, updated less)
+paru -S opencode-bin               # Arch Linux
+mise use -g opencode               # Any OS
+nix run nixpkgs#opencode           # or github:anomalyco/opencode for latest dev branch
+```
+
+測試執行，Ctrl+C可以離開
+
+```bash
+opencode
+```
+
+```bash
+# 登入自己LLM的帳號
+opencode auth login
+
+# 登出自己LLM的帳號
+opencode auth logout
+
+# 查看自己LLM的帳號
+opencode auth whoami
+
+# 查看設定資訊
+opencode config
+
+# 或列出模型 (通常會標示目前使用的)
+opencode models
+```
+
+### 1. 把opencode接上自己的 Google Antigravity 帳號，這樣就不用租用純API流量
+
+原理是把你Antigravity對Google之間的溝通轉接一份到opencode
+請在opencode的對話框，請AI幫你裝
+
+```bash
+Install the opencode-antigravity-auth plugin and add the Antigravity model definitions to ~/.config/opencode/opencode.json by following: https://raw.githubusercontent.com/NoeFabris/opencode-antigravity-auth/dev/README.md
+```
+
+裝完之後請執行下列命令登入取得API存取權
+你的編輯器會呼叫browser出來讓你登入google帳號
+
+```bash
+opencode auth login
+
+┌  Add credential
+│
+◇  Select provider
+│  Google
+│
+◇  Login method
+│  OAuth with Google (Antigravity)
+```
+
+然後你可以使用google的gemini來測試一下
+
+```bash
+opencode --model google/antigravity-gemini-3-pro --variant=max
+```

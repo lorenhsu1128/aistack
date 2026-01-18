@@ -1,6 +1,6 @@
 name: Code to Mermaid
 description: 將選定的程式碼邏輯轉換為 Mermaid 流程圖
-trigger: /graph
+trigger: /mermaid
 
 steps:
   - name: 邏輯提取
@@ -15,6 +15,6 @@ steps:
       
   - name: 寫入文件
     instruction: |
-      檢查當前目錄是否有 `README.md` 或 `DESIGN.md`。
+      檢查當前目錄是否有 `DESIGN.md`。
       如果沒有則建立。
       將生成的 Mermaid 代碼插入到文件中，並用 Markdown code block 包裹。
