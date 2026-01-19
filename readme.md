@@ -389,6 +389,8 @@ opencode models
 原理是把你Antigravity對Google之間的溝通轉接一份到opencode
 請在opencode的對話框，請AI幫你裝
 
+* **安裝本plug-in需要先安裝docker，到這 <https://www.docker.com/> 下載安裝，我是用 Docker Desktop for Windows**
+
 ```bash
 Install the opencode-antigravity-auth plugin and add the Antigravity model definitions to ~/.config/opencode/opencode.json by following: https://raw.githubusercontent.com/NoeFabris/opencode-antigravity-auth/dev/README.md
 ```
