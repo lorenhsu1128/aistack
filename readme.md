@@ -190,121 +190,90 @@
 
 ##### 1. 建立 Workflows 的位置
 
-通常您需要在專案根目錄或全域設定資料夾中，建立一個 `workflows` 資料夾。
+通常您需要在專案根目錄中建立一個 `.agent/workflows` 資料夾。
 
-* **路徑範例**：`.antigravity/workflows/` 或 `~/.gemini/workflows/`
-* **檔案格式**：通常支援 `.yaml` 或 `.md` (Markdown)。
+* **路徑範例**：`.agent/workflows/`
+* **檔案格式**：`.md` (Markdown) 搭配 YAML Frontmatter。
+* **觸發方式**：檔案名稱即為觸發指令。例如建立 `test.md`，則通過 `/test` 觸發。
 
 ##### 2. Workflows 的結構
 
-一個標準的工作流通常包含三個部分：
+一個標準的工作流檔案包含 YAML 檔頭與 Markdown 步驟：
 
-1. **Trigger (觸發詞)**：您在對話框輸入什麼指令會啟動它（例如 `/test`）。
-2. **Context (上下文)**：Agent 需要讀取哪些檔案。
-3. **Steps (步驟)**：一步步的指令清單。
+```markdown
+---
+description: [簡短描述，例如：如何部署應用程式]
+---
+[具體的執行步驟]
+
+1. 第一步...
+2. 第二步...
+// turbo
+3. 第三步 (會自動執行命令)...
+```
+
+* **description**: 簡單描述這個 Workflow 的功能。
+* **步驟**: 使用自然語言描述 Agent 該做什麼。
+* **// turbo**: 若在步驟前加上此註解，Agent 將有權限自動執行該步驟中的命令 (SafeToAutoRun)。
+* **// turbo-all**: 若在檔案中加入此註解，則所有步驟都將自動執行。
 
 ##### 3. 實用 Workflows 範本（中文版）
 
-以下我為您設計了三個針對您興趣（Python、Mermaid、文件化）的 Workflow 範本。可以將這些存成 `.yaml` 檔放入資料夾中。
+以下我為您設計了三個針對您興趣（Python、Mermaid、文件化）的 Workflow 範本。請將這些內容存為 `.md` 檔案並放入 `.agent/workflows/` 資料夾中。
 
-###### 範本 A：Python 單元測試生成器 (Unit Test Generator)
+###### 範本 A：Python 單元測試生成器 (test.md)
 
 這個 Workflow 會自動為您選定的檔案生成測試，並嘗試執行驗證。
 
-* **檔案名稱**：`generate_tests.yaml`
-* **觸發指令**：`/test` 或 `@test`
+* **檔案名稱**：`test.md`
+* **觸發指令**：`/test`
 
-```yaml
-name: Generate Python Tests
+```markdown
+---
 description: 為當前 Python 檔案生成 Pytest 單元測試並執行
-trigger: /test
-
-steps:
-  - name: 分析程式碼
-    instruction: |
-      閱讀當前開啟的 Python 檔案。
-      理解其商業邏輯、輸入與輸出型別。
-
-  - name: 撰寫測試
-    instruction: |
-      在 `tests/` 資料夾下建立對應的 `test_<filename>.py`。
-      使用 `pytest` 框架。
-      包含正常情況 (Happy Path) 與邊緣情況 (Edge Cases)。
-      請確保測試程式碼中有繁體中文註解。
-
-  - name: 執行與修正
-    instruction: |
-      執行 `pytest`。
-      如果測試失敗，請分析錯誤原因，並嘗試自動修復原始程式碼或測試程式碼。
-      重複此步驟直到測試通過或嘗試 3 次為止。
-
+---
+1. 分析程式碼：閱讀當前開啟的 Python 檔案。理解其商業邏輯、輸入與輸出型別。
+2. 撰寫測試：在 `tests/` 資料夾下建立對應的 `test_<filename>.py`。使用 `pytest` 框架。包含正常情況 (Happy Path) 與邊緣情況 (Edge Cases)。請確保測試程式碼中有繁體中文註解。
+// turbo
+3. 執行與修正：執行 `pytest`。如果測試失敗，請分析錯誤原因，並嘗試自動修復原始程式碼或測試程式碼。重複此步驟直到測試通過或嘗試 3 次為止。
 ```
 
-###### 範本 B：Mermaid 圖表自動生成 (Diagramize)
+###### 範本 B：Mermaid 圖表自動生成 (mermaid.md)
 
 這個 Workflow 能幫把複雜的程式碼瞬間變成 Mermaid 流程圖。
 
-* **檔案名稱**：`generate_mermaid.yaml`
+* **檔案名稱**：`mermaid.md`
 * **觸發指令**：`/mermaid`
 
-```yaml
-name: Code to Mermaid
+```markdown
+---
 description: 將選定的程式碼邏輯轉換為 Mermaid 流程圖
-trigger: /mermaid
-
-steps:
-  - name: 邏輯提取
-    instruction: |
-      分析選取的程式碼區塊或檔案。
-      識別主要的控制流程（if/else, loops, function calls）。
-
-  - name: 生成圖表
-    instruction: |
-      生成一段 Mermaid `flowchart TD` 或 `sequenceDiagram` 代碼。
-      使用繁體中文標註節點名稱。
-      
-  - name: 寫入文件
-    instruction: |
-      檢查當前目錄是否有 `DESIGN.md`。
-      如果沒有則建立。
-      將生成的 Mermaid 代碼插入到文件中，並用 Markdown code block 包裹。
-
+---
+1. 邏輯提取：分析選取的程式碼區塊或檔案。識別主要的控制流程（if/else, loops, function calls）。
+2. 生成圖表：生成一段 Mermaid `flowchart TD` 或 `sequenceDiagram` 代碼。使用繁體中文標註節點名稱。
+3. 寫入文件：檢查當前目錄是否有 `DESIGN.md`。如果沒有則建立。將生成的 Mermaid 代碼插入到文件中，並用 Markdown code block 包裹。
 ```
 
-###### 範本 C：繁體中文代碼審查 (Code Review)
+###### 範本 C：繁體中文代碼審查 (review.md)
 
 在您提交程式碼前，讓 Agent 擔任資深工程師幫您檢查。
 
-* **檔案名稱**：`review_python.yaml`
-* **觸發指令**：`/review_python`
+* **檔案名稱**：`review.md`
+* **觸發指令**：`/review`
 
-```yaml
-name: Senior Python Code Review
+```markdown
+---
 description: 進行嚴格的代碼審查並提供繁體中文報告
-trigger: /review_python
-
-steps:
-  - name: 安全與效能檢查
-    instruction: |
-      掃描程式碼中的潛在資安漏洞（如 SQL Injection, 硬編碼金鑰）。
-      檢查時間複雜度，指出可能的效能瓶頸。
-
-  - name: 風格檢查
-    instruction: |
-      檢查是否符合 PEP 8 (Python) 規範。
-      檢查變數命名是否語意清晰。
-
-  - name: 產出報告
-    instruction: |
-      總結上述發現。
-      輸出格式如下：
-      ### 🔍 代碼審查報告
-      - **評分**：(1-10分)
-      - **主要問題**：(列點)
-      - **優化建議**：(提供修改後的代碼範例)
-      
-      請全程使用繁體中文，語氣需專業且友善。
-
+---
+1. 安全與效能檢查：掃描程式碼中的潛在資安漏洞（如 SQL Injection, 硬編碼金鑰）。檢查時間複雜度，指出可能的效能瓶頸。
+2. 風格檢查：檢查是否符合 PEP 8 (Python) 規範。檢查變數命名是否語意清晰。
+3. 產出報告：總結上述發現。輸出格式如下：
+   ### 🔍 代碼審查報告
+   - **評分**：(1-10分)
+   - **主要問題**：(列點)
+   - **優化建議**：(提供修改後的代碼範例)
+   
+   請全程使用繁體中文，語氣需專業且友善。
 ```
 
 ---
@@ -315,11 +284,10 @@ steps:
 
 1. **開啟對話框**：在 Antigravity 的 Chat 面板中。
 2. **輸入指令**：
-
-* 想要幫剛寫好的 `main.py` 寫測試？ -> 輸入 `/test @main.py`
-* 想要看懂一段複雜的邏輯？ -> 選取程式碼，輸入 `/mermaid`
-* 寫完功能了？ -> 輸入 `/review`
-* **觀察執行**：您會看到 Agent 按照您定義的 `steps` 一步步執行，而不是漫無目的地亂猜。
+   * 想要幫剛寫好的 `main.py` 寫測試？ -> 輸入 `/test` (確保已開啟該檔案或提及它)
+   * 想要看懂一段複雜的邏輯？ -> 輸入 `/mermaid`
+   * 寫完功能了？ -> 輸入 `/review`
+3. **觀察執行**：您會看到 Agent 按照您定義的步驟一步步執行。
 
 ## opencode 安裝指南
 
@@ -386,10 +354,11 @@ opencode models
 
 ### 1. 把opencode接上自己的 Google Antigravity 帳號，這樣就不用租用純API流量
 
+* **安裝本plug-in需要先安裝docker，到這 <https://www.docker.com/> 下載安裝，我是用 Docker Desktop for Windows**
+
+這opencode的plug-in是opencode-antigravity-auth
 原理是把你Antigravity對Google之間的溝通轉接一份到opencode
 請在opencode的對話框，請AI幫你裝
-
-* **安裝本plug-in需要先安裝docker，到這 <https://www.docker.com/> 下載安裝，我是用 Docker Desktop for Windows**
 
 ```bash
 Install the opencode-antigravity-auth plugin and add the Antigravity model definitions to ~/.config/opencode/opencode.json by following: https://raw.githubusercontent.com/NoeFabris/opencode-antigravity-auth/dev/README.md
@@ -415,3 +384,5 @@ opencode auth login
 ```bash
 opencode --model google/antigravity-gemini-3-pro --variant=max
 ```
+
+## opencode 設定指南
